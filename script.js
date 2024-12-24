@@ -25,6 +25,7 @@ function simulateProjectile() {
     // Input validation
     if (v0 < 0 || g <= 0) {
         clearCanvas();
+        updateTrajectoryInfo('--', '--', '--');
         return;
     }
 
@@ -47,6 +48,7 @@ function simulateProjectile() {
         const discriminant = v0y ** 2 + 2 * g * h0;
         if (discriminant < 0) {
             clearCanvas();
+            updateTrajectoryInfo('--', '--', '--');
             return;
         }
         totalTime = (v0y + Math.sqrt(discriminant)) / g;
@@ -57,6 +59,9 @@ function simulateProjectile() {
 
     // Maximum vertical distance
     const hMax = h0 + (v0y ** 2) / (2 * g);
+
+    // Update trajectory information display
+    updateTrajectoryInfo(hMax.toFixed(2), xMax.toFixed(2), totalTime.toFixed(2));
 
     // Set up canvas
     const canvas = document.getElementById('trajectoryCanvas');
@@ -120,6 +125,14 @@ function simulateProjectile() {
     }
 
     ctx.stroke();
+}
+
+
+// Function to update the trajectory information display
+function updateTrajectoryInfo(maxHeight, horizontalDistance, timeOfFlight) {
+    document.getElementById('maxHeight').textContent = maxHeight;
+    document.getElementById('horizontalDistance').textContent = horizontalDistance;
+    document.getElementById('timeOfFlight').textContent = timeOfFlight;
 }
 
 // Function to draw the cannon

@@ -46,6 +46,25 @@ h1 {
     border-radius: 4px;
 }
 
+/* Styles for trajectory information */
+#trajectoryInfo {
+    margin-top: 20px;
+    margin-left: 30px;
+    margin-right: 20px;
+    max-width: 200px;
+    font-size: 14px;
+}
+
+#trajectoryInfo h2 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#trajectoryInfo p {
+    margin: 5px 0;
+}
+
+
 /* Canvas */
 #trajectoryCanvas {
     display: block;
@@ -86,3 +105,4 @@ footer {
         width: 90%;
     }
 }
+
