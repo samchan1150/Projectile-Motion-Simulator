@@ -1,0 +1,40 @@
+/* style.css */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+#controls {
+    margin-bottom: 20px;
+}
+
+.input-group {
+    margin: 5px 0;
+}
+
+.input-group label {
+    display: inline-block;
+    width: 150px;
+    text-align: right;
+    margin-right: 10px;
+}
+
+.input-group input {
+    width: 100px;
+}
+
+#launchButton {
+    margin-top: 10px;
+    padding: 5px 15px;
+}
+
+#trajectoryCanvas {
+    border: 1px solid #000;
+    background-color: #f0f0f0;
+}
