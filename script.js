@@ -17,14 +17,13 @@ window.onload = initializeSimulator;
 
 function simulateProjectile() {
     // Retrieve user inputs
-    const h0 = parseFloat(document.getElementById('initialHeight').value) || 0; // Initial height
-    const v0 = parseFloat(document.getElementById('initialVelocity').value) || 0; // Initial velocity
-    const angleDeg = parseFloat(document.getElementById('launchAngle').value) || 0; // Launch angle in degrees
-    const g = parseFloat(document.getElementById('gravity').value) || 9.81; // Gravity
+    const h0 = parseFloat(document.getElementById('initialHeight').value) || 0;
+    const v0 = parseFloat(document.getElementById('initialVelocity').value) || 0;
+    const angleDeg = parseFloat(document.getElementById('launchAngle').value) || 0;
+    const g = parseFloat(document.getElementById('gravity').value) || 9.81;
 
     // Input validation
     if (v0 < 0 || g <= 0) {
-        // Clear canvas if inputs are invalid
         clearCanvas();
         return;
     }
@@ -33,26 +32,20 @@ function simulateProjectile() {
     const angleRad = angleDeg * (Math.PI / 180);
 
     // Initial velocity components
-    const v0x = v0 * Math.cos(angleRad); // Horizontal component
-    const v0y = v0 * Math.sin(angleRad); // Vertical component
+    const v0x = v0 * Math.cos(angleRad);
+    const v0y = v0 * Math.sin(angleRad);
 
     let totalTime;
 
     if (v0y === 0) {
-        // Handle zero vertical velocity (angle = 0 degrees)
         if (h0 > 0) {
-            // Only vertical motion due to initial height
             totalTime = Math.sqrt((2 * h0) / g);
         } else {
-            // No vertical motion; projectile is already on the ground
             totalTime = 0;
         }
     } else {
-        // Time until the projectile lands
-        // Solve quadratic equation y(t) = 0 to find total flight time
         const discriminant = v0y ** 2 + 2 * g * h0;
         if (discriminant < 0) {
-            // Clear canvas if discriminant is negative (no real roots)
             clearCanvas();
             return;
         }
@@ -71,7 +64,7 @@ function simulateProjectile() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Padding around the canvas
-    const padding = 50;
+    const padding = 60;
 
     // Determine the scaling factor to be the same for both axes
     let scaleRatioX = (canvas.width - 2 * padding) / xMax;
@@ -90,10 +83,11 @@ function simulateProjectile() {
 
     // Adjust offsets to position the trajectory correctly
     const offsetX = padding;
-    const offsetY = canvas.height - padding - h0 * scale;
+    const baseY = canvas.height - padding;
+    const offsetY = baseY - h0 * scale;
 
-    // Draw axes (optional)
-    drawAxes(ctx, canvas, padding);
+    // Draw axes with scales
+    drawAxes(ctx, canvas, padding, offsetX, baseY, scale, xMax, hMax, h0);
 
     // Draw the cannon at the starting point
     drawCannon(ctx, offsetX, offsetY, angleRad);
@@ -116,7 +110,7 @@ function simulateProjectile() {
 
         // Canvas coordinates
         const canvasX = offsetX + x * scale;
-        const canvasY = offsetY - y * scale; // Invert y-axis and adjust for offset
+        const canvasY = baseY - y * scale;
 
         if (i === 0) {
             ctx.moveTo(canvasX, canvasY);
@@ -146,21 +140,87 @@ function drawCannon(ctx, x, y, angle) {
     ctx.restore(); // Restore the original context state
 }
 
-// Function to draw axes (optional)
-function drawAxes(ctx, canvas, padding) {
+// Function to draw axes with scale markers and labels
+function drawAxes(ctx, canvas, padding, offsetX, offsetY, scale, xMax, hMax, h0) {
     ctx.beginPath();
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 1;
 
-    // X-axis
+    // Set font for labels
+    ctx.font = '12px Arial';
+    ctx.fillStyle = 'black';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Draw X-axis
     ctx.moveTo(padding, canvas.height - padding);
     ctx.lineTo(canvas.width - padding, canvas.height - padding);
 
-    // Y-axis
+    // Draw Y-axis
     ctx.moveTo(padding, canvas.height - padding);
     ctx.lineTo(padding, padding);
 
     ctx.stroke();
+
+    // Number of ticks on each axis
+    const xTicks = 10;
+    const yTicks = 10;
+
+    // X-axis scale markers and labels
+    for (let i = 0; i <= xTicks; i++) {
+        const xValue = (xMax / xTicks) * i;
+        const xCanvas = offsetX + xValue * scale;
+
+        // Draw tick mark
+        ctx.beginPath();
+        ctx.moveTo(xCanvas, canvas.height - padding - 5);
+        ctx.lineTo(xCanvas, canvas.height - padding + 5);
+        ctx.stroke();
+
+        // Draw label
+        ctx.fillText(xValue.toFixed(1), xCanvas, canvas.height - padding + 15);
+    }
+
+    // Y-axis scale markers and labels
+    for (let i = 0; i <= yTicks; i++) {
+        const yValue = ((hMax + h0) / yTicks) * i;
+        const yCanvas = offsetY - yValue * scale;
+
+        // Draw tick mark
+        ctx.beginPath();
+        ctx.moveTo(padding - 5, yCanvas);
+        ctx.lineTo(padding + 5, yCanvas);
+        ctx.stroke();
+
+        // Draw label
+        ctx.textAlign = 'right';
+        ctx.fillText(yValue.toFixed(1), padding - 10, yCanvas);
+    }
+
+    // Adjust positions of axis labels to avoid overlap
+
+    // Axis labels
+    ctx.save();
+    ctx.font = '14px Arial';
+    ctx.fillStyle = 'black';
+
+    // X-axis label
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    // Position the X-axis label below the tick labels
+    ctx.fillText('Distance (m)', canvas.width / 2, canvas.height - padding + 40);
+
+    // Y-axis label (rotated)
+    ctx.save();
+    ctx.translate(padding - 40, canvas.height / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    // Position the Y-axis label to the left of the tick labels
+    ctx.fillText('Height (m)', 0, 0);
+    ctx.restore();
+
+    ctx.restore();
 }
 
 // Function to clear the canvas
