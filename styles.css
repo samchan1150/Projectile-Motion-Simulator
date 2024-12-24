@@ -1,40 +1,88 @@
-/* style.css */
+/* styles.css */
+
+/* General Styles */
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
     margin: 0;
-    padding: 20px;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8;
+    color: #333;
 }
 
 h1 {
-    margin-bottom: 20px;
+    text-align: center;
+    background-color: #1976d2; /* Blue header */
+    color: #fff;
+    padding: 20px 0;
+    margin: 0;
+    font-size: 2em;
 }
 
+/* Controls Section */
 #controls {
-    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .input-group {
-    margin: 5px 0;
+    margin: 10px 15px;
+    display: flex;
+    flex-direction: column;
+    max-width: 200px;
 }
 
 .input-group label {
-    display: inline-block;
-    width: 150px;
-    text-align: right;
-    margin-right: 10px;
+    margin-bottom: 5px;
+    font-weight: bold;
 }
 
 .input-group input {
-    width: 100px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
-#launchButton {
-    margin-top: 10px;
-    padding: 5px 15px;
-}
-
+/* Canvas */
 #trajectoryCanvas {
-    border: 1px solid #000;
-    background-color: #f0f0f0;
+    display: block;
+    margin: 20px auto;
+    border: 2px solid #1976d2;
+    background-color: #e1f5fe; /* Light blue background */
+    border-radius: 5px;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 15px 0;
+    background-color: #1976d2;
+    color: #fff;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .input-group {
+        max-width: 100%;
+        margin: 10px 0;
+    }
+
+    #launchButton {
+        width: 100%;
+    }
+
+    #controls {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #trajectoryCanvas {
+        width: 90%;
+    }
 }

@@ -1,12 +1,33 @@
-// Event listener for the launch button
-document.getElementById('launchButton').addEventListener('click', simulateProjectile);
+// Function to initialize event listeners and draw initial trajectory
+function initializeSimulator() {
+    // Get all input elements
+    const inputs = document.querySelectorAll('#controls input');
+
+    // Add event listeners to all input elements
+    inputs.forEach(input => {
+        input.addEventListener('input', simulateProjectile);
+    });
+
+    // Draw the initial trajectory
+    simulateProjectile();
+}
+
+// Call initialize function on window load
+window.onload = initializeSimulator;
 
 function simulateProjectile() {
     // Retrieve user inputs
-    const h0 = parseFloat(document.getElementById('initialHeight').value); // Initial height
-    const v0 = parseFloat(document.getElementById('initialVelocity').value); // Initial velocity
-    const angleDeg = parseFloat(document.getElementById('launchAngle').value); // Launch angle in degrees
-    const g = parseFloat(document.getElementById('gravity').value); // Gravity
+    const h0 = parseFloat(document.getElementById('initialHeight').value) || 0; // Initial height
+    const v0 = parseFloat(document.getElementById('initialVelocity').value) || 0; // Initial velocity
+    const angleDeg = parseFloat(document.getElementById('launchAngle').value) || 0; // Launch angle in degrees
+    const g = parseFloat(document.getElementById('gravity').value) || 9.81; // Gravity
+
+    // Input validation
+    if (v0 < 0 || g <= 0) {
+        // Clear canvas if inputs are invalid
+        clearCanvas();
+        return;
+    }
 
     // Convert angle to radians
     const angleRad = angleDeg * (Math.PI / 180);
@@ -15,10 +36,28 @@ function simulateProjectile() {
     const v0x = v0 * Math.cos(angleRad); // Horizontal component
     const v0y = v0 * Math.sin(angleRad); // Vertical component
 
-    // Time until the projectile lands
-    // Solve quadratic equation y(t) = 0 to find total flight time
-    const discriminant = v0y ** 2 + 2 * g * h0;
-    const totalTime = (v0y + Math.sqrt(discriminant)) / g;
+    let totalTime;
+
+    if (v0y === 0) {
+        // Handle zero vertical velocity (angle = 0 degrees)
+        if (h0 > 0) {
+            // Only vertical motion due to initial height
+            totalTime = Math.sqrt((2 * h0) / g);
+        } else {
+            // No vertical motion; projectile is already on the ground
+            totalTime = 0;
+        }
+    } else {
+        // Time until the projectile lands
+        // Solve quadratic equation y(t) = 0 to find total flight time
+        const discriminant = v0y ** 2 + 2 * g * h0;
+        if (discriminant < 0) {
+            // Clear canvas if discriminant is negative (no real roots)
+            clearCanvas();
+            return;
+        }
+        totalTime = (v0y + Math.sqrt(discriminant)) / g;
+    }
 
     // Maximum horizontal distance
     const xMax = v0x * totalTime;
@@ -32,11 +71,19 @@ function simulateProjectile() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Padding around the canvas
-    const padding = 20;
+    const padding = 50;
 
     // Determine the scaling factor to be the same for both axes
-    const scaleRatioX = (canvas.width - 2 * padding) / xMax;
-    const scaleRatioY = (canvas.height - 2 * padding) / (hMax + h0);
+    let scaleRatioX = (canvas.width - 2 * padding) / xMax;
+    let scaleRatioY = (canvas.height - 2 * padding) / (hMax + h0);
+
+    // Handle cases where xMax or hMax is zero
+    if (!isFinite(scaleRatioX) || scaleRatioX <= 0) {
+        scaleRatioX = 1;
+    }
+    if (!isFinite(scaleRatioY) || scaleRatioY <= 0) {
+        scaleRatioY = 1;
+    }
 
     // Use the smaller scaling factor to ensure the entire trajectory fits in the canvas
     const scale = Math.min(scaleRatioX, scaleRatioY);
@@ -51,12 +98,19 @@ function simulateProjectile() {
     // Draw the cannon at the starting point
     drawCannon(ctx, offsetX, offsetY, angleRad);
 
+    // If totalTime is zero, there's nothing to draw
+    if (totalTime === 0) {
+        return;
+    }
+
     // Drawing the trajectory
     ctx.beginPath();
     ctx.strokeStyle = 'red';
     ctx.lineWidth = 2;
 
-    for (let t = 0; t <= totalTime; t += totalTime / 1000) {
+    const steps = 1000;
+    for (let i = 0; i <= steps; i++) {
+        const t = (i / steps) * totalTime;
         const x = v0x * t;
         const y = h0 + v0y * t - 0.5 * g * t ** 2;
 
@@ -64,7 +118,7 @@ function simulateProjectile() {
         const canvasX = offsetX + x * scale;
         const canvasY = offsetY - y * scale; // Invert y-axis and adjust for offset
 
-        if (t === 0) {
+        if (i === 0) {
             ctx.moveTo(canvasX, canvasY);
         } else {
             ctx.lineTo(canvasX, canvasY);
@@ -78,7 +132,7 @@ function simulateProjectile() {
 function drawCannon(ctx, x, y, angle) {
     ctx.save(); // Save the current context state
     ctx.translate(x, y); // Move to the cannon's position
-    ctx.rotate(-angle); // Rotate to match the launch angle (negative to adjust for canvas coordinate system)
+    ctx.rotate(-angle); // Rotate to match the launch angle (negative due to canvas coordinates)
 
     // Draw the cannon barrel
     ctx.fillStyle = 'black';
@@ -107,4 +161,11 @@ function drawAxes(ctx, canvas, padding) {
     ctx.lineTo(padding, padding);
 
     ctx.stroke();
+}
+
+// Function to clear the canvas
+function clearCanvas() {
+    const canvas = document.getElementById('trajectoryCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
